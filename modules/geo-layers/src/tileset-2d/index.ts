@@ -21,5 +21,6 @@ export {
   urlType,
   getURLFromTemplate,
   getTileIndices,
-  tileToBoundingBox
+  tileToBoundingBox,
+  getPresignedUrl
 } from './utils';

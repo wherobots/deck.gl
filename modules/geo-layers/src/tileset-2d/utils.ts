@@ -2,6 +2,8 @@ import {Viewport} from '@deck.gl/core';
 import {Matrix4} from '@math.gl/core';
 import {getOSMTileIndices} from './tile-2d-traversal';
 import {Bounds, GeoBoundingBox, TileBoundingBox, TileIndex, ZRange} from './types';
+import {getSignedUrl} from '@aws-sdk/s3-request-presigner';
+import {S3Client, GetObjectCommand, S3ClientConfig} from '@aws-sdk/client-s3';
 
 const TILE_SIZE = 512;
 const DEFAULT_EXTENT: Bounds = [-Infinity, -Infinity, Infinity, Infinity];
@@ -91,6 +93,22 @@ export function getURLFromTemplate(
     url = url.replace(/\{-y\}/g, String(Math.pow(2, index.z) - index.y - 1));
   }
   return url;
+}
+
+export async function getPresignedUrl(
+  url: string,
+  s3ClientConfig: S3ClientConfig
+): Promise<string> {
+  const [bucket, key] = getS3BucketKey(url);
+
+  const client = new S3Client(s3ClientConfig);
+  const command = new GetObjectCommand({Bucket: bucket, Key: key});
+  return await getSignedUrl(client, command, {expiresIn: 3600});
+}
+
+function getS3BucketKey(url: string): [string, string] {
+  const parts = url.substring(5).split('/');
+  return [parts[0], parts.slice(1).join('/')];
 }
 
 /**

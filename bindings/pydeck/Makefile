@@ -1,4 +1,5 @@
 BIN=env/bin/
+WORKON_HOME ?= env
 
 help:
 	@echo "\nPlease use \`make target\` where target is one of\n"
@@ -31,7 +32,7 @@ setup-env:
 	test `command -v python3` || echo Please install python3
 	test `command -v yarn` || echo Please install yarn
 	test `command -v python3` && test `command -v yarn`
-	python3 -m venv env
+	python3 -m venv $(WORKON_HOME)
 
 prepare-jupyter:
 	# Enable the notebook extension

@@ -33,8 +33,10 @@ import {
   getURLFromTemplate,
   URLTemplate,
   isGeoBoundingBox,
-  isURLTemplate
+  isURLTemplate,
+  getPresignedUrl
 } from '../tileset-2d/index';
+import {S3ClientConfig} from '@aws-sdk/client-s3';
 
 const WORLD_SIZE = 512;
 
@@ -93,6 +95,8 @@ export type _MVTLayerProps = {
    * @default [MVTWorkerLoader] from `@loaders.gl/mvt`
    */
   loaders?: Loader[];
+
+  s3ClientConfig?: S3ClientConfig;
 };
 
 type ContentWGS84Cache = {_contentWGS84?: Feature[]};
@@ -209,14 +213,22 @@ export default class MVTLayer<ExtraProps extends {} = {}> extends TileLayer<
     return super.renderLayers();
   }
 
-  getTileData(loadProps: TileLoadProps): Promise<ParsedMvtTile> {
+  async getTileData(loadProps: TileLoadProps): Promise<ParsedMvtTile> {
     const {data, binary} = this.state;
     const {index, signal} = loadProps;
 
-    const url = getURLFromTemplate(data, loadProps);
-    if (!url) {
+    const urlFromTemplate = getURLFromTemplate(data, loadProps);
+    if (!urlFromTemplate) {
       return Promise.reject('Invalid URL');
     }
+
+    let url: string;
+    if (urlFromTemplate.startsWith('s3://')) {
+      url = await getPresignedUrl(urlFromTemplate, this.props.s3ClientConfig);
+    } else {
+      url = urlFromTemplate;
+    }
+
     let loadOptions = this.getLoadOptions();
     const {fetch} = this.props;
     loadOptions = {
