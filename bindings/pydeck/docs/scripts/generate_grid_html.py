@@ -1,4 +1,5 @@
 """Generates HTML grid landing page for gallery examples"""
+
 import os
 import glob
 
