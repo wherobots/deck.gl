@@ -29,9 +29,6 @@ const LINK_STYLE = {
   cursor: 'grab'
 };
 
-/* global window */
-const devicePixelRatio = (typeof window !== 'undefined' && window.devicePixelRatio) || 1;
-
 function getTooltip({tile}) {
   if (tile) {
     const {x, y, z} = tile.index;
@@ -41,7 +38,9 @@ function getTooltip({tile}) {
 }
 
 export default function App({showBorder = false, onTilesLoad = null}) {
-  const tileLayer = new PMTLayer({url: "https://r2-public.protomaps.com/protomaps-sample-datasets/protomaps-basemap-opensource-20230408.pmtiles"});
+  const tileLayer = new PMTLayer({
+    url: 'https://r2-public.protomaps.com/protomaps-sample-datasets/protomaps-basemap-opensource-20230408.pmtiles'
+  });
 
   return (
     <DeckGL
